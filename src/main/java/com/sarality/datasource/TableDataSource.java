@@ -30,8 +30,13 @@ public class TableDataSource<T> implements DataSource<List<T>> {
 
   @Override
   public List<T> load() {
-    dataList = table.readAll(query);
-    return dataList;
+    try {
+      table.open();
+      dataList = table.readAll(query);
+      return dataList;
+    } finally {
+      table.close();
+    }
   }
 
   @Override
