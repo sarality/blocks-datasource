@@ -14,7 +14,7 @@ import java.util.List;
  *
  * @author satya@ (Satya)
  */
-public class AggregateQueryDataSource<K, T> implements DataSource<List<K>> {
+public class TransformQueryDataSource<K, T> implements DataSource<List<K>> {
 
   // TODO(abhideep): Use table rather than SQLite inheritance <-- kept this todo as a copy from TableDataSource (satya)
   private final SQLiteTable<T> table;
@@ -23,7 +23,7 @@ public class AggregateQueryDataSource<K, T> implements DataSource<List<K>> {
 
   private List<K> dataList;
 
-  public AggregateQueryDataSource(TableRegistry registry, String tableName, SimpleQueryBuilder queryBuilder,
+  public TransformQueryDataSource(TableRegistry registry, String tableName, SimpleQueryBuilder queryBuilder,
       CursorDataExtractor<K> cursorDataExtractor) {
     this.table = (SQLiteTable<T>) registry.getTable(tableName);
     this.queryBuilder = queryBuilder;
