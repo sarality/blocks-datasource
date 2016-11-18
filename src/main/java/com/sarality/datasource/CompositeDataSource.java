@@ -11,11 +11,9 @@ import java.util.Map;
 /**
  * Data Source that composes a data object by combining data from multiple data sources.
  *
- * @author abhideep@ (Abhideep Singh)
+ * @author satya@ (Satya Puniani)
  */
 public class CompositeDataSource<T, A, I> implements DataSource<List<T>> {
-
-  private Map<I, List<T>> parentDataMap = new HashMap<>();
 
   private final DataSource<List<T>> dataSource;
 
@@ -23,7 +21,7 @@ public class CompositeDataSource<T, A, I> implements DataSource<List<T>> {
 
   private FieldValueGetter<T, I> parentIndexExtractor;
   private FieldValueGetter<A, I> childIndexExtractor;
-  private ChildDataSetter<T, A> setter;
+  private ChildDataSetter<T, A> parentFieldValueSetter;
 
   private List<T> dataList;
   private Map<I, List<T>> indexedDataMap = new HashMap<>();
@@ -39,7 +37,7 @@ public class CompositeDataSource<T, A, I> implements DataSource<List<T>> {
     this.associatedSource = associatedSource;
     this.parentIndexExtractor = parentIndexExtractor;
     this.childIndexExtractor = associatedDataIndexExtractor;
-    this.setter = setter;
+    this.parentFieldValueSetter = setter;
 
     return this;
   }
@@ -65,7 +63,8 @@ public class CompositeDataSource<T, A, I> implements DataSource<List<T>> {
     return dataList;
   }
 
-  @Override public List<T> getData() {
+  @Override
+  public List<T> getData() {
     return dataList;
   }
 
@@ -84,7 +83,7 @@ public class CompositeDataSource<T, A, I> implements DataSource<List<T>> {
       values = indexedDataMap.get(index);
       if (values != null) {
         for (T parentData : values) {
-          setter.setChildData(parentData, associatedData);
+          parentFieldValueSetter.setChildData(parentData, associatedData);
         }
       }
     }
