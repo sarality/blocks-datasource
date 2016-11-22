@@ -46,9 +46,13 @@ public class CompositeDataSource<T, A, I> implements DataSource<List<T>> {
   public List<T> load() {
     dataList = dataSource.load();
 
+    if (dataList == null || dataList.isEmpty()) {
+      return dataList;
+    }
+
     for (T data : dataList) {
       I index = parentIndexExtractor.getValue(data);
-      if (indexedDataMap.containsKey(index)) {
+      if (!indexedDataMap.containsKey(index)) {
         indexedDataMap.put(index, new ArrayList<T>());
       }
       List<T> values = indexedDataMap.get(index);
