@@ -1,7 +1,7 @@
 package com.sarality.datasource;
 
 import com.sarality.db.common.FieldValueGetter;
-import com.sarality.db.common.ChildDataSetter;
+import com.sarality.db.common.FieldValueSetter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,7 +21,7 @@ public class CompositeDataSource<T, A, I> implements DataSource<List<T>> {
 
   private FieldValueGetter<T, I> parentIndexExtractor;
   private FieldValueGetter<A, I> childIndexExtractor;
-  private ChildDataSetter<T, A> parentFieldValueSetter;
+  private FieldValueSetter<T, A> parentFieldValueSetter;
 
   private List<T> dataList;
   private Map<I, List<T>> indexedDataMap = new HashMap<>();
@@ -32,7 +32,7 @@ public class CompositeDataSource<T, A, I> implements DataSource<List<T>> {
 
   public CompositeDataSource<T, A, I> composeWith(DataSource<List<A>> associatedSource,
       FieldValueGetter<T, I> parentIndexExtractor, FieldValueGetter<A, I> associatedDataIndexExtractor,
-      ChildDataSetter<T, A> setter) {
+      FieldValueSetter<T, A> setter) {
 
     this.associatedSource = associatedSource;
     this.parentIndexExtractor = parentIndexExtractor;
@@ -45,16 +45,13 @@ public class CompositeDataSource<T, A, I> implements DataSource<List<T>> {
   @Override
   public List<T> load() {
     dataList = dataSource.load();
-    I index;
-    List<T> values;
 
     for (T data : dataList) {
-      index = parentIndexExtractor.getValue(data);
-      values = indexedDataMap.get(index);
-      if (values == null) {
-        values = new ArrayList<T>();
-        indexedDataMap.put(index, values);
+      I index = parentIndexExtractor.getValue(data);
+      if (indexedDataMap.containsKey(index)) {
+        indexedDataMap.put(index, new ArrayList<T>());
       }
+      List<T> values = indexedDataMap.get(index);
       values.add(data);
     }
 
@@ -83,7 +80,7 @@ public class CompositeDataSource<T, A, I> implements DataSource<List<T>> {
       values = indexedDataMap.get(index);
       if (values != null) {
         for (T parentData : values) {
-          parentFieldValueSetter.setChildData(parentData, associatedData);
+          parentFieldValueSetter.setValue(parentData, associatedData);
         }
       }
     }
