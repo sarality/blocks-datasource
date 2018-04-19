@@ -16,28 +16,18 @@ public class PrimaryKeyDataSource<T> implements DataSource<T> {
 
   private final Table<T> table;
   private final Column entityIdColumn;
-  private final String entityType;
-  private Long entityId;
+  private final Long entityId;
   private T entityData;
 
-  public PrimaryKeyDataSource(Table<T> table, Column entityIdColumn, String entityType) {
+  public PrimaryKeyDataSource(Table<T> table, Column entityIdColumn, Long entityId) {
+    assert (entityId != null);
     this.table = table;
     this.entityIdColumn = entityIdColumn;
-    this.entityType = entityType;
-  }
-
-  public T load(Long entityId) {
     this.entityId = entityId;
-    return load();
   }
 
   @Override
   public T load() {
-    if (entityId == null) {
-      return null;
-    }
-
-    entityData = null;
 
     try {
       table.open();
@@ -52,7 +42,7 @@ public class PrimaryKeyDataSource<T> implements DataSource<T> {
       }
 
       if (dataList.size() > 1) {
-        throw new IllegalStateException("More than one " + entityType + " exists with Id " + entityId);
+        throw new IllegalStateException("More than one " + table.getName() + " exists with Id " + entityId);
       }
 
       this.entityData = dataList.get(0);
