@@ -2,6 +2,7 @@ package com.sarality.datasource;
 
 import com.sarality.db.Column;
 import com.sarality.db.Table;
+import com.sarality.db.TableRegistry;
 import com.sarality.db.query.SimpleQueryBuilder;
 
 import java.util.List;
@@ -14,14 +15,14 @@ import java.util.List;
 
 public class PrimaryKeyDataSource<T> implements DataSource<T> {
 
-  private final Table<T> table;
+  private final String tableName;
   private final Column entityIdColumn;
   private final Long entityId;
   private T entityData;
 
-  public PrimaryKeyDataSource(Table<T> table, Column entityIdColumn, Long entityId) {
+  public PrimaryKeyDataSource(String tableName, Column entityIdColumn, Long entityId) {
     assert (entityId != null);
-    this.table = table;
+    this.tableName = tableName;
     this.entityIdColumn = entityIdColumn;
     this.entityId = entityId;
   }
@@ -29,6 +30,7 @@ public class PrimaryKeyDataSource<T> implements DataSource<T> {
   @Override
   public T load() {
 
+    Table<T> table = TableRegistry.getInstance().getTable(tableName);
     try {
       table.open();
 
