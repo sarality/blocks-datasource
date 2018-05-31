@@ -23,6 +23,11 @@ public class TableDataSource<T> implements DataSource<List<T>> {
     this((Table<T>) registry.getTable(tableName), query);
   }
 
+  @SuppressWarnings("unchecked")
+  public TableDataSource(String tableName, Query query) {
+    this((Table<T>) TableRegistry.getInstance().getTable(tableName), query);
+  }
+
   public TableDataSource(Table<T> table, Query query) {
     this.table = table;
     this.query = query;
