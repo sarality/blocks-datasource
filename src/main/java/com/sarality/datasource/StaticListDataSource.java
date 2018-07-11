@@ -1,7 +1,6 @@
 package com.sarality.datasource;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -13,10 +12,10 @@ public class StaticListDataSource<T> implements DataSource<List<T>> {
 
   private final List<T> dataList;
 
-  public StaticListDataSource(T... data) {
+  public StaticListDataSource(List<T> list) {
     dataList = new ArrayList<>();
-    if (data != null) {
-      Collections.addAll(dataList, data);
+    if (list != null) {
+      dataList.addAll(list);
     }
   }
 
