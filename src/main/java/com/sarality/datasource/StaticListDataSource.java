@@ -13,9 +13,11 @@ public class StaticListDataSource<T> implements DataSource<List<T>> {
   private final List<T> dataList;
 
   public StaticListDataSource(List<T> list) {
-    dataList = new ArrayList<>();
     if (list != null) {
+      dataList = new ArrayList<>();
       dataList.addAll(list);
+    } else {
+      dataList = null;
     }
   }
 
