@@ -1,6 +1,6 @@
 package com.sarality.datasource;
 
-import android.content.Context;
+import android.text.TextUtils;
 
 import com.sarality.db.SQLiteTable;
 import com.sarality.db.TableRegistry;
@@ -19,37 +19,38 @@ import java.util.Set;
 public class JoinQueryDataSource<T> implements DataSource<List<T>> {
 
   // TODO(abhideep): User table rather than SQLite inheritance
-  private final Context context;
   private final SQLiteTable<T> table;
   private final SimpleJoinQueryBuilder queryBuilder;
   private final JoinQueryCursorDataExtractor<T> cursorDataExtractor;
+  private final boolean isMultiDbJoin;
 
   private List<T> dataList;
 
   public JoinQueryDataSource(TableRegistry registry, String tableName, SimpleJoinQueryBuilder queryBuilder,
       JoinQueryCursorDataExtractor<T> cursorDataExtractor) {
-    this(null, registry, tableName, queryBuilder, cursorDataExtractor);
+    this(registry, tableName, queryBuilder, cursorDataExtractor, false);
   }
 
-  public JoinQueryDataSource(Context context, TableRegistry registry, String tableName,
-      SimpleJoinQueryBuilder queryBuilder, JoinQueryCursorDataExtractor<T> cursorDataExtractor) {
-    this.context = context;
+  public JoinQueryDataSource(TableRegistry registry, String tableName,
+      SimpleJoinQueryBuilder queryBuilder, JoinQueryCursorDataExtractor<T> cursorDataExtractor,
+      boolean isMultiDbJoin) {
     this.table = (SQLiteTable<T>) registry.getTable(tableName);
     this.queryBuilder = queryBuilder;
     this.cursorDataExtractor = cursorDataExtractor;
+    this.isMultiDbJoin = isMultiDbJoin;
   }
 
   @Override
   public List<T> load() {
     try {
       table.open();
-      if (context != null) {
+      if (isMultiDbJoin) {
         attachDatabases();
       }
       dataList = table.readAll(queryBuilder.build(), cursorDataExtractor);
       return dataList;
     } finally {
-      if (context != null) {
+      if (isMultiDbJoin) {
         detachDatabases();
       }
       table.close();
@@ -57,29 +58,35 @@ public class JoinQueryDataSource<T> implements DataSource<List<T>> {
   }
 
   private void attachDatabases() {
-    Set<String> dbNameSet = new HashSet<>();
-    List<String> dbNameList = queryBuilder.getDatabaseList();
-    if (dbNameList != null && !dbNameList.isEmpty()) {
-      for (String dbName : dbNameList) {
-        if (!dbNameSet.contains(dbName)) {
-          String sql = "ATTACH DATABASE ? AS " + queryBuilder.getDatabaseAlias(dbName);
-          String[] queryArgs = new String[] {context.getDatabasePath(dbName).getPath()};
-          table.execSQL(sql, queryArgs);
-          dbNameSet.add(dbName);
+    Set<String> dbAliasSet = new HashSet<>();
+    List<String> tableNameList = queryBuilder.getTablesWithDbAlias();
+    if (tableNameList != null && !tableNameList.isEmpty()) {
+      for (String tableName : tableNameList) {
+        String dbAlias = queryBuilder.getDatabaseAlias(tableName);
+        if (TextUtils.isEmpty(dbAlias)) {
+          throw new IllegalStateException("Database Alias not registered for Table " + tableName);
+        }
+        if (!dbAliasSet.contains(dbAlias)) {
+          SQLiteTable<?> dbTable = (SQLiteTable<?>) TableRegistry.getInstance().getTable(tableName);
+          table.attachDatabase(dbTable, dbAlias);
+          dbAliasSet.add(dbAlias);
         }
       }
     }
   }
 
   private void detachDatabases() {
-    Set<String> dbNameSet = new HashSet<>();
-    List<String> dbNameList = queryBuilder.getDatabaseList();
-    if (dbNameList != null && !dbNameList.isEmpty()) {
-      for (String dbName : dbNameList) {
-        if (!dbNameSet.contains(dbName)) {
-          String sql = "DETACH DATABASE " + queryBuilder.getDatabaseAlias(dbName);
-          table.execSQL(sql, null);
-          dbNameSet.add(dbName);
+    Set<String> dbAliasSet = new HashSet<>();
+    List<String> tableNameList = queryBuilder.getTablesWithDbAlias();
+    if (tableNameList != null && !tableNameList.isEmpty()) {
+      for (String tableName : tableNameList) {
+        String dbAlias = queryBuilder.getDatabaseAlias(tableName);
+        if (TextUtils.isEmpty(dbAlias)) {
+          throw new IllegalStateException("Database Alias not registered for Table " + tableName);
+        }
+        if (!dbAliasSet.contains(dbAlias)) {
+          table.detachDatabase(dbAlias);
+          dbAliasSet.add(dbAlias);
         }
       }
     }
