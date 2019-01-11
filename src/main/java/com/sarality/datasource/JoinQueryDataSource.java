@@ -68,7 +68,7 @@ public class JoinQueryDataSource<T> implements DataSource<List<T>> {
         }
         if (!dbAliasSet.contains(dbAlias)) {
           SQLiteTable<?> dbTable = (SQLiteTable<?>) TableRegistry.getInstance().getTable(tableName);
-          table.attachDatabase(dbTable, dbAlias);
+          table.attachDatabase(dbTable.getDbFilePath(), dbAlias);
           dbAliasSet.add(dbAlias);
         }
       }
