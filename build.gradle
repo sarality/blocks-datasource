@@ -21,6 +21,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(path: ':blocks:db')
     implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation 'com.darwinsys:hirondelle-date4j:1.5.1'
     implementation 'org.slf4j:slf4j-android:1.7.21'
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
