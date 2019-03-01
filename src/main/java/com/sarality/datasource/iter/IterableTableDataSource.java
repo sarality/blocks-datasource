@@ -7,9 +7,9 @@ import java.util.List;
  *
  * @author abhideep@ (Abhideep Singh)
  */
-public abstract class IterableTableDataSource<T, P> extends IterableCursorDataSource<T, T, P> {
+public class IterableTableDataSource<T, P> extends IterableCursorDataSource<T, T, P> {
 
-  public IterableTableDataSource(String tableName, DataSourceIterator<P> iterator) {
+  public IterableTableDataSource(String tableName, QueryIterator<T, P> iterator) {
     super(tableName, null, iterator);
   }
 
@@ -17,7 +17,7 @@ public abstract class IterableTableDataSource<T, P> extends IterableCursorDataSo
   public List<T> load() {
     try {
       table.open();
-      dataList = table.readAll(getQuery());
+      dataList = table.readAll(getIterator().getQuery());
       return dataList;
     } finally {
       table.close();
