@@ -20,5 +20,5 @@ public interface QueryIterator<T, P> {
 
   Query getQuery();
 
-  public P reset();
+  P reset();
 }

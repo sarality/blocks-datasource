@@ -5,7 +5,7 @@ import com.sarality.datasource.DataSource;
 import java.util.List;
 
 /**
- * Iterates through a Data Source one page at a time.
+ * Iterates through queries for a Data Source by chnaging the Page offset for the Query.
  *
  * @author abhideep@ (Abhideep Singh)
  */

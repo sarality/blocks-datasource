@@ -7,7 +7,8 @@ import com.sarality.db.cursor.CursorDataExtractor;
 import java.util.List;
 
 /**
- * A DataSource that queries a Table based on Iterator.
+ * A DataSource that queries a Table based on a QueryIterator and return a different data object than the
+ * one returned by the Table.
  *
  * @author abhideep@ (Abhideep Singh)
  */
@@ -37,8 +38,12 @@ public class IterableCursorDataSource<T, K, P> implements IterableDataSource<K, 
 
   @Override
   public List<K> next() {
-    iterator.next();
-    return load();
+    if (iterator.hasNext()) {
+      iterator.next();
+      return load();
+    }
+    dataList = null;
+    return dataList;
   }
 
   @Override
