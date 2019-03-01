@@ -7,7 +7,7 @@ import java.util.List;
 import hirondelle.date4j.DateTime;
 
 /**
- * Iterates through a Data Source by incrementing the Date
+ * Iterates through queries for a Data Source by incrementing the Date used by the Query.
  *
  * @author abhideep@ (Abhideep Singh)
  */
