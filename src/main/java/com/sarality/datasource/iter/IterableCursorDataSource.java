@@ -3,7 +3,6 @@ package com.sarality.datasource.iter;
 import com.sarality.db.SQLiteTable;
 import com.sarality.db.TableRegistry;
 import com.sarality.db.cursor.CursorDataExtractor;
-import com.sarality.db.query.Query;
 
 import java.util.List;
 
@@ -12,34 +11,33 @@ import java.util.List;
  *
  * @author abhideep@ (Abhideep Singh)
  */
-public abstract class IterableCursorDataSource<T, K, P> implements IterableDataSource<K, P> {
+public class IterableCursorDataSource<T, K, P> implements IterableDataSource<K, P> {
   protected final SQLiteTable<T> table;
   private final CursorDataExtractor<K> cursorDataExtractor;
-  private final DataSourceIterator<P> iterator;
+  private final QueryIterator<K, P> iterator;
 
   protected List<K> dataList;
 
   public IterableCursorDataSource(String tableName, CursorDataExtractor<K> cursorDataExtractor,
-      DataSourceIterator<P> iterator) {
+      QueryIterator<K, P> iterator) {
     this.table = (SQLiteTable<T>) TableRegistry.getInstance().getTable(tableName);
     this.cursorDataExtractor = cursorDataExtractor;
     this.iterator = iterator;
+    this.iterator.setContext(this);
   }
 
-  protected DataSourceIterator<P> getIterator() {
+  QueryIterator<K, P> getIterator() {
     return iterator;
   }
 
-  public abstract Query getQuery();
-
   @Override
   public boolean hasNext() {
-    return iterator.hasNext(dataList == null ? 0 : dataList.size());
+    return iterator.hasNext();
   }
 
   @Override
   public List<K> next() {
-    iterator.moveToNext(dataList == null ? 0 : dataList.size());
+    iterator.next();
     return load();
   }
 
@@ -47,7 +45,7 @@ public abstract class IterableCursorDataSource<T, K, P> implements IterableDataS
   public List<K> load() {
     try {
       table.open();
-      dataList = table.readAll(getQuery(), cursorDataExtractor);
+      dataList = table.readAll(iterator.getQuery(), cursorDataExtractor);
       return dataList;
     } finally {
       table.close();
