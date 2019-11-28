@@ -1,7 +1,7 @@
 package com.sarality.datasource;
 
 import android.content.Context;
-import android.support.v4.content.AsyncTaskLoader;
+import androidx.loader.content.AsyncTaskLoader;
 
 /**
  * Task that loads the data asynchronously.
